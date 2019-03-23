@@ -84,24 +84,6 @@ fn osstring_invalid_string() -> impl Strategy<Value = OsString> {
     })
 }
 
-#[cfg(not(target_os = "windows"))]
-fn osstring_invalid_string() -> impl Strategy<Value = OsString> {
-    use std::os::unix::ffi::OsStringExt;
-    use crate::arbitrary::_std::string::not_utf8_bytes;
-    static_map(not_utf8_bytes(true), OsString::from_vec)
-}
-
-arbitrary!(VarError,
-    TupleUnion<(
-        W<Just<Self>>,
-        W<SFnPtrMap<BoxedStrategy<OsString>, Self>>
-    )>;
-    prop_oneof![
-        Just(VarError::NotPresent),
-        static_map(osstring_invalid_string().boxed(), VarError::NotUnicode)
-    ]
-);
-
 #[cfg(test)]
 mod test {
     use super::*;
